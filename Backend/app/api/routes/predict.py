@@ -1,20 +1,10 @@
 from fastapi import APIRouter
-from app.schemas.user_input import UserInput
+from app.schemas.predict_schema import PredictRequest
 from app.services.predict import predict_user
 
-router = APIRouter()
+router = APIRouter(prefix="/predict", tags=["Prediction"])
 
-
-@router.post("/predict")
-def predict(data: UserInput):
-    """
-    Predict loan, card, offer and churn risk
-    """
-
-    # Convert schema → dict
-    input_data = data.dict()
-
-    # Call prediction engine
-    result = predict_user(input_data)
-
+@router.post("/")
+def predict(data: PredictRequest):
+    result = predict_user(data.dict())
     return result

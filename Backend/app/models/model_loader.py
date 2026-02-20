@@ -4,7 +4,8 @@ import os
 models = {}
 
 def load_models():
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # go from app/models → app → Backend
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     artifacts_path = os.path.join(base_dir, "artifacts")
 
     try:
@@ -13,7 +14,7 @@ def load_models():
         models["loan_model"] = joblib.load(os.path.join(artifacts_path, "loan_model_rf.joblib"))
         models["offer_model"] = joblib.load(os.path.join(artifacts_path, "offer_model_rf.joblib"))
         models["kmeans_model"] = joblib.load(os.path.join(artifacts_path, "unsup_kmeans.joblib"))
-        models["scaler"] = joblib.load(os.path.join(artifacts_path, "unsup_scaler.joblib"))
+        models["scaler_model"] = joblib.load(os.path.join(artifacts_path, "unsup_scaler.joblib"))
 
         print("All models loaded successfully.")
 
