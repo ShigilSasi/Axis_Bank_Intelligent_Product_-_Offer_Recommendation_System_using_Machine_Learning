@@ -59,8 +59,16 @@ def fetch_features(account_id: str) -> dict:
         if row is None:
             raise ValueError(f"No features found for account_id: {account_id}")
 
-        # Map to dict using FEATURES order
-        return dict(zip(FEATURES, row))
+        # Convert Decimal → float/int for ML models
+        converted = []
+        for i, val in enumerate(row):
+            col = FEATURES[i]
+            if col in ['total_transactions', 'upi_txn', 'pos_txn', 'neft_txn']:
+                converted.append(int(val))
+            else:
+                converted.append(float(val))
+
+        return dict(zip(FEATURES, converted))
 
     finally:
         conn.close()
