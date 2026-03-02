@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-
+import psycopg2
+import os
 from app.models.model_loader import models
 
 
@@ -25,9 +26,48 @@ cluster_name_map = {
 }
 
 
+# ================= DB CONNECTION =================
+def get_db_connection():
+    return psycopg2.connect(
+        host=os.environ["shigil-pc.cfei2y0gokv7.ap-south-1.rds.amazonaws.com"],
+        database=os.environ["Axis_Bank"],
+        user=os.environ["postgres"],
+        password=os.environ["Shigil-2000"],
+        port=os.environ["5432"],
+        connect_timeout=5
+    )
+
+
+# ================= FETCH FEATURES FROM DB =================
+def fetch_features(account_id: str) -> dict:
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT
+                total_debit, total_credit, total_transactions,
+                food_spend, shopping_spend, transport_spend,
+                rent_spend, emi_spend, utility_spend,
+                upi_txn, pos_txn, neft_txn,
+                savings_ratio, emi_ratio, food_ratio, digital_ratio
+            FROM features
+            WHERE account_id = %s
+        """, (account_id,))
+
+        row = cur.fetchone()
+
+        if row is None:
+            raise ValueError(f"No features found for account_id: {account_id}")
+
+        # Map to dict using FEATURES order
+        return dict(zip(FEATURES, row))
+
+    finally:
+        conn.close()
+
+
 # ================= RECOMMENDATION ENGINE =================
 def recommend_products(row):
-
     recommendations = {
         "credit_cards": [],
         "loans": [],
@@ -82,45 +122,45 @@ def recommend_products(row):
 
 
 # ================= MAIN PREDICT FUNCTION =================
-def predict_user(input_data: dict):
+def predict_user(account_id: str):
 
-    scaler = models["scaler_model"]
-    kmeans = models["kmeans_model"]
-    loan_model = models["loan_model"]
-    card_model = models["card_model"]
+    # ---------- Step 1: Fetch features from DB ----------
+    input_data = fetch_features(account_id)
+
+    scaler      = models["scaler_model"]
+    kmeans      = models["kmeans_model"]
+    loan_model  = models["loan_model"]
+    card_model  = models["card_model"]
     offer_model = models["offer_model"]
     churn_model = models["churn_model"]
 
     df = pd.DataFrame([input_data])
 
-    # ---------- Cluster ----------
+    # ---------- Step 2: Cluster ----------
     X_scaled = scaler.transform(df[FEATURES])
-    cluster = kmeans.predict(X_scaled)[0]
+    cluster  = kmeans.predict(X_scaled)[0]
     df['cluster'] = cluster
 
-    # ---------- Supervised ----------
-    X_model = df[MODEL_FEATURES]
-
-    loan_pred = int(loan_model.predict(X_model)[0])
-    card_pred = int(card_model.predict(X_model)[0])
+    # ---------- Step 3: Supervised ML ----------
+    X_model    = df[MODEL_FEATURES]
+    loan_pred  = int(loan_model.predict(X_model)[0])
+    card_pred  = int(card_model.predict(X_model)[0])
     offer_pred = int(offer_model.predict(X_model)[0])
     churn_pred = int(churn_model.predict(X_model)[0])
-
     churn_prob = float(churn_model.predict_proba(X_model)[0][1])
 
-    # ---------- Recommendation ----------
+    # ---------- Step 4: Recommendations ----------
     recommendations = recommend_products(df.iloc[0])
 
-    # ---------- Final ----------
-    response = {
-        "cluster": int(cluster),
-        "cluster_label": cluster_name_map.get(int(cluster), "Unknown"),
-        "loan_eligible": 1 if len(recommendations['loans']) > 0 else loan_pred,
-        "card_suitable": 1 if len(recommendations['credit_cards']) > 0 else card_pred,
-        "offer_eligible": 1 if len(recommendations['offers']) > 0 else offer_pred,
-        "churn_risk": churn_pred,
+    # ---------- Step 5: Return ----------
+    return {
+        "account_id":        account_id,
+        "cluster":           int(cluster),
+        "cluster_label":     cluster_name_map.get(int(cluster), "Unknown"),
+        "loan_eligible":     1 if len(recommendations['loans']) > 0        else loan_pred,
+        "card_suitable":     1 if len(recommendations['credit_cards']) > 0 else card_pred,
+        "offer_eligible":    1 if len(recommendations['offers']) > 0       else offer_pred,
+        "churn_risk":        churn_pred,
         "churn_probability": churn_prob,
-        "recommendations": recommendations
+        "recommendations":   recommendations
     }
-
-    return response
