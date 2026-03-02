@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import psycopg2
 import os
+from dotenv import load_dotenv
 from app.models.model_loader import models
 
 
@@ -27,13 +28,15 @@ cluster_name_map = {
 
 
 # ================= DB CONNECTION =================
+load_dotenv()
+
 def get_db_connection():
     return psycopg2.connect(
-        host="shigil-pc.cfei2y0gokv7.ap-south-1.rds.amazonaws.com",
-        database="Axis_Bank",
-        user="postgres",
-        password="Shigil-2000",
-        port=5432,
+        host=os.getenv("DB_HOST"),
+        database=os.getenv("DB_NAME"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        port=int(os.getenv("DB_PORT", 5432)),
         connect_timeout=5
     )
 

@@ -4,3 +4,18 @@ output/
 *.parquet
 *.json
 
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# ML model files
+*.joblib
+
+# VS Code
+.vscode/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
