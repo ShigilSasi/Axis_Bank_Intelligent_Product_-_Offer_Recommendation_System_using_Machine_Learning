@@ -29,11 +29,11 @@ cluster_name_map = {
 # ================= DB CONNECTION =================
 def get_db_connection():
     return psycopg2.connect(
-        host=os.environ["shigil-pc.cfei2y0gokv7.ap-south-1.rds.amazonaws.com"],
-        database=os.environ["Axis_Bank"],
-        user=os.environ["postgres"],
-        password=os.environ["Shigil-2000"],
-        port=os.environ["5432"],
+        host="shigil-pc.cfei2y0gokv7.ap-south-1.rds.amazonaws.com",
+        database="Axis_Bank",
+        user="postgres",
+        password="Shigil-2000",
+        port=5432,
         connect_timeout=5
     )
 
@@ -61,6 +61,57 @@ def fetch_features(account_id: str) -> dict:
 
         # Map to dict using FEATURES order
         return dict(zip(FEATURES, row))
+
+    finally:
+        conn.close()
+
+
+# ================= FETCH TRANSACTIONS FROM DB =================
+def fetch_transactions(account_id: str) -> list:
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT
+                txn_date, narration, channel,
+                merchant, category, debit, credit, balance
+            FROM transactions
+            WHERE account_id = %s
+            ORDER BY txn_date DESC
+        """, (account_id,))
+
+        rows = cur.fetchall()
+        columns = ['txn_date', 'narration', 'channel',
+                   'merchant', 'category', 'debit', 'credit', 'balance']
+        return [dict(zip(columns, row)) for row in rows]
+
+    finally:
+        conn.close()
+
+
+# ================= FETCH ACCOUNT INFO FROM DB =================
+def fetch_account_info(account_id: str) -> dict:
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT
+                account_holder, account_number, account_type,
+                ifsc, branch, currency, statement_period,
+                statement_start, statement_end, customer_id
+            FROM account_info
+            WHERE account_id = %s
+        """, (account_id,))
+
+        row = cur.fetchone()
+
+        if row is None:
+            raise ValueError(f"No account found for account_id: {account_id}")
+
+        columns = ['account_holder', 'account_number', 'account_type',
+                   'ifsc', 'branch', 'currency', 'statement_period',
+                   'statement_start', 'statement_end', 'customer_id']
+        return dict(zip(columns, row))
 
     finally:
         conn.close()
