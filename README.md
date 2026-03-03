@@ -560,9 +560,3 @@ python-dotenv>=1.0
 
 ---
 
-<div align="center">
-
-Built with ❤️ for **Axis Bank** · Smart Banking Intelligence Platform
-
-
-</div>
