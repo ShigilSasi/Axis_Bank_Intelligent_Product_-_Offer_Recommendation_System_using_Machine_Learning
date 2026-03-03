@@ -87,9 +87,9 @@ Dashboard (5 tabs)
 |-------|-----------|--------|
 | Customer Segmentation | KMeans (k=4) | Cluster ID + Label |
 | Churn Prediction | Random Forest | Probability (0.0–1.0) |
-| Credit Card Eligibility | Logistic Regression | Binary (0 or 1) |
-| Loan Eligibility | Gradient Boosting | Binary (0 or 1) |
-| Offer Eligibility | Logistic Regression | Binary (0 or 1) |
+| Credit Card Eligibility | Random Forest | Binary (0 or 1) |
+| Loan Eligibility | Random Forest | Binary (0 or 1) |
+| Offer Eligibility | Random Forest | Binary (0 or 1) |
 | Feature Engineering | Rule-based | 13 numerical features |
 
 ---
