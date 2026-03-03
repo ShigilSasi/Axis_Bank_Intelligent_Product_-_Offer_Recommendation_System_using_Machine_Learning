@@ -1158,7 +1158,7 @@ def page_dashboard():
                     Check back after more transactions.
                 </div>
             </div>
-            """, unsafe_allow_html=True)
+            """, unsafe_allow_html=False)
 
 
 # ================================================================
