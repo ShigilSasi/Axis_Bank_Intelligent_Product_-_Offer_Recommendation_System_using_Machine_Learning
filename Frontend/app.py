@@ -41,10 +41,10 @@ st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
-    html, body, [class*="css"] {{
-        font-family: 'DM Sans', sans-serif;
-        color: {AXIS_TEXT};
-    }}
+    html, body {{
+    font-family: 'DM Sans', sans-serif;
+    color: #1A1A2E ;
+}}
     .stApp {{ background: #FAFAFA; }}
     #MainMenu, footer, header {{ visibility: hidden; }}
     .block-container {{ padding-top: 0 !important; max-width: 100% !important; }}
@@ -355,9 +355,18 @@ def load_and_go(account_id):
 # CHART HELPERS
 # ================================================================
 BASE_LAYOUT = dict(
-    paper_bgcolor="white", plot_bgcolor="white",
+    paper_bgcolor="white",
+    plot_bgcolor="white",
     font=dict(family="DM Sans", color=AXIS_TEXT),
-    margin=dict(t=50, b=30, l=30, r=30)
+    margin=dict(t=70, b=60, l=60, r=40),
+    xaxis=dict(
+        title_font=dict(size=14, color=AXIS_TEXT),
+        tickfont=dict(size=12, color=AXIS_TEXT)
+    ),
+    yaxis=dict(
+        title_font=dict(size=14, color=AXIS_TEXT),
+        tickfont=dict(size=12, color=AXIS_TEXT)
+    )
 )
 COLORS = [AXIS_RED, AXIS_GOLD, "#E8726A", "#2196F3",
           "#4CAF50", "#9C27B0", "#FF9800", "#00BCD4", "#795548", "#607D8B"]
@@ -849,8 +858,8 @@ def page_dashboard():
     # FEATURES
     # ============================================================
     elif tab == "features":
-        st.markdown("<div class='section-header'>Feature Engineering Insights</div>",
-                    unsafe_allow_html=True)
+        st.markdown("<div class='section-header'>Customer Behavioral Analysis</div>",
+            unsafe_allow_html=True)
 
         if df.empty:
             st.info("No data available.")
@@ -902,8 +911,8 @@ def page_dashboard():
     # ML INSIGHTS
     # ============================================================
     elif tab == "ml":
-        st.markdown("<div class='section-header'>ML Predictions & Insights</div>",
-                    unsafe_allow_html=True)
+        st.markdown("<div class='section-header'>AI-Powered Customer Intelligence</div>",
+            unsafe_allow_html=True)
 
         cluster_descs = {
             "Affluent Borrowers":         "High income, active borrowers with strong repayment.",
@@ -951,8 +960,16 @@ def page_dashboard():
 
         st.markdown("<div class='axis-divider'></div>", unsafe_allow_html=True)
         st.markdown(f"""
-        <div style="font-family:'Playfair Display',serif;font-size:1.2rem;
-             font-weight:600;margin-bottom:1rem;">Eligibility Status</div>
+        <div style="
+            font-family:'Playfair Display',serif;
+            font-size:1.3rem;
+            font-weight:700;
+            margin-bottom:1rem;
+            color:{AXIS_TEXT};
+            border-bottom:2px solid {AXIS_RED};
+            padding-bottom:6px;">
+            Product Eligibility & Risk Assessment
+        </div>
         """, unsafe_allow_html=True)
 
         e1, e2, e3, e4 = st.columns(4)
@@ -974,7 +991,13 @@ def page_dashboard():
                 st.markdown(f"""
                 <div style="background:white;border-radius:14px;padding:22px;
                      text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
-                    <div style="font-weight:600;font-size:0.88rem;margin-bottom:10px;">{lbl}</div>
+                    <div style="
+                        font-weight:700;
+                        font-size:0.95rem;
+                        margin-bottom:12px;
+                        color:{AXIS_TEXT};">
+                        {lbl}
+                    </div>
                     <div class="{badge}">{status}</div>
                 </div>
                 """, unsafe_allow_html=True)
