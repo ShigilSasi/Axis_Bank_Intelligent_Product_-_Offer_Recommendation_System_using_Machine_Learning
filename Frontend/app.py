@@ -252,7 +252,6 @@ def navbar():
     <div class="navbar">
         <div>
             <div class="navbar-brand">🏦 Axis Bank</div>
-            <div class="navbar-tagline">Badhte Ka Naam Zindagi</div>
         </div>
         <div style="color:rgba(255,255,255,0.7);font-size:0.82rem;">
             Smart Banking Intelligence Platform
@@ -289,25 +288,37 @@ def upload_to_s3(file_bytes, filename):
         return False
 
 
-def poll_for_account_id(retries=15, delay=3):
+def poll_for_account_id(filename, retries=20, delay=3):
+    """
+    Poll S3 processed/ for the JSON that belongs to this specific uploaded file.
+    Matches by looking for JSONs created AFTER upload started.
+    """
     s3 = boto3.client(
         "s3",
         region_name=AWS_REGION,
         aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
         aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
     )
+    upload_time = time.time()  # Record when this upload started
+
     for _ in range(retries):
         try:
             res = s3.list_objects_v2(Bucket=S3_BUCKET, Prefix="processed/")
-            json_keys = sorted(
-                [o["Key"] for o in res.get("Contents", [])
-                 if o["Key"].endswith("_account_info.json")],
-                reverse=True
-            )
-            if json_keys:
-                obj  = s3.get_object(Bucket=S3_BUCKET, Key=json_keys[0])
-                info = json.loads(obj["Body"].read())
-                acct = info.get("account_number")
+            contents = res.get("Contents", [])
+
+            # Only consider JSON files created AFTER this upload started
+            new_jsons = [
+                o for o in contents
+                if o["Key"].endswith("_account_info.json")
+                and o["LastModified"].timestamp() >= upload_time - 5
+            ]
+
+            if new_jsons:
+                # Pick the most recently modified one
+                latest = sorted(new_jsons, key=lambda x: x["LastModified"], reverse=True)[0]
+                obj    = s3.get_object(Bucket=S3_BUCKET, Key=latest["Key"])
+                info   = json.loads(obj["Body"].read())
+                acct   = info.get("account_number")
                 if acct:
                     return acct
         except Exception:
@@ -341,9 +352,26 @@ def call_account(account_id):
         return {}
 
 
+def clear_session():
+    """Clear all old data from session state."""
+    st.session_state.predictions  = None
+    st.session_state.transactions = None
+    st.session_state.account_info = None
+    st.session_state.account_id   = None
+    st.session_state.active_tab   = "overview"
+
+
 def load_and_go(account_id):
-    """Fetch all data for account_id and navigate to dashboard."""
+    """Clear old data, fetch fresh data, navigate to dashboard."""
     account_id = account_id.strip()
+
+    # ✅ Clear old data first — previous PDF never bleeds into new one
+    st.session_state.predictions  = None
+    st.session_state.transactions = None
+    st.session_state.account_info = None
+    st.session_state.active_tab   = "overview"
+
+    # ✅ Load fresh data for new account
     st.session_state.account_id   = account_id
     st.session_state.predictions  = call_predict(account_id)
     st.session_state.transactions = call_transactions(account_id)
@@ -617,7 +645,7 @@ def page_upload():
                 progress.progress(30, text="Waiting for Lambda to process...")
 
                 if success:
-                    account_id = poll_for_account_id()
+                    account_id = poll_for_account_id(uploaded.name)
                     progress.progress(70, text="Fetching ML predictions...")
 
                     if account_id:
@@ -737,6 +765,8 @@ def page_dashboard():
         with col:
             if st.button(label, key=f"nav_{key}"):
                 if key == "upload":
+                    # ✅ Clear all data when going back to upload new statement
+                    clear_session()
                     st.session_state.page = "upload"
                 else:
                     st.session_state.active_tab = key
