@@ -564,6 +564,5 @@ python-dotenv>=1.0
 
 Built with ❤️ for **Axis Bank** · Smart Banking Intelligence Platform
 
-*Badhte Ka Naam Zindagi*
 
 </div>
