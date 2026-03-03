@@ -16,3 +16,36 @@ Built using:
  - Streamlit
 
  - Plotly
+
+# Project Overview
+
+This system enables:
+
+ - Automated PDF bank statement ingestion
+
+ - Transaction extraction using AWS Lambda
+
+ - Feature engineering from financial behavior
+
+ - Customer segmentation (Clustering)
+
+ - Churn prediction
+
+ - Product eligibility scoring
+
+ - Personalized recommendations
+
+ - Interactive dashboard visualization
+
+# System Architecture
+User Upload (Streamlit)
+        ↓
+AWS S3 (Raw PDF Storage)
+        ↓
+AWS Lambda (PDF Parsing & Transaction Extraction)
+        ↓
+PostgreSQL (RDS)
+        ↓
+FastAPI (ML Inference Layer)
+        ↓
+Streamlit Dashboard (Visualization)
