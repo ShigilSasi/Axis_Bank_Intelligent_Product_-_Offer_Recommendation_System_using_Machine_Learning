@@ -5,14 +5,14 @@ A full-stack Machine Learning system that analyzes customer bank statements, ext
 
 Built using:
 
-🧠 Machine Learning (Scikit-Learn / XGBoost)
+ - Machine Learning (Scikit-Learn / XGBoost)
 
-☁️ AWS (S3, Lambda, RDS)
+ - AWS (S3, Lambda, RDS)
 
-🐘 PostgreSQL
+ - PostgreSQL
 
-⚡ FastAPI
+ - FastAPI
 
-🎨 Streamlit
+ - Streamlit
 
-📊 Plotly
+ - Plotly
