@@ -38,14 +38,14 @@ This system enables:
  - Interactive dashboard visualization
 
 # System Architecture
-User Upload (Streamlit)
+ - User Upload (Streamlit)
         ↓
-AWS S3 (Raw PDF Storage)
+ - AWS S3 (Raw PDF Storage)
         ↓
-AWS Lambda (PDF Parsing & Transaction Extraction)
+ - AWS Lambda (PDF Parsing & Transaction Extraction)
         ↓
-PostgreSQL (RDS)
+ - PostgreSQL (RDS)
         ↓
-FastAPI (ML Inference Layer)
+ - FastAPI (ML Inference Layer)
         ↓
-Streamlit Dashboard (Visualization)
+ - Streamlit Dashboard (Visualization)
