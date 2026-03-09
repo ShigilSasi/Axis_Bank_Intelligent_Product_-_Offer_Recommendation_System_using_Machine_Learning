@@ -365,13 +365,13 @@ def load_and_go(account_id):
     """Clear old data, fetch fresh data, navigate to dashboard."""
     account_id = account_id.strip()
 
-    # ✅ Clear old data first — previous PDF never bleeds into new one
+    #lear old data first — previous PDF never bleeds into new one
     st.session_state.predictions  = None
     st.session_state.transactions = None
     st.session_state.account_info = None
     st.session_state.active_tab   = "overview"
 
-    # ✅ Load fresh data for new account
+    # Load fresh data for new account
     st.session_state.account_id   = account_id
     st.session_state.predictions  = call_predict(account_id)
     st.session_state.transactions = call_transactions(account_id)
@@ -651,7 +651,7 @@ def page_upload():
                     if account_id:
                         load_and_go(account_id)
                         progress.progress(100, text="Done!")
-                        st.success(f"✅ Analysis complete — Account {account_id}")
+                        st.success(f"Analysis complete — Account {account_id}")
                         time.sleep(1)
                         st.rerun()
                     else:
@@ -765,7 +765,7 @@ def page_dashboard():
         with col:
             if st.button(label, key=f"nav_{key}"):
                 if key == "upload":
-                    # ✅ Clear all data when going back to upload new statement
+                    #Clear all data when going back to upload new statement
                     clear_session()
                     st.session_state.page = "upload"
                 else:
